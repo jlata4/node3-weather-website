@@ -20,8 +20,8 @@ app.use(express.static(publicDirectoryPath))
 
 app.get('',(req,res)=> {
     res.render('index', {
-        message: 'Hello Express!!',
-        title: 'HOME',
+        message: 'Use this site to get your weather',
+        title: 'WEATHER',
         author: 'Juhi Lata'
     })
 })
@@ -44,31 +44,27 @@ app.get('/about',(req,res)=> {
 app.get('/weather',(req,res)=> {
     console.log(req.query.address)
 
-    
     if(!req.query.address){
-        return res.send([{
-            error: 'Please provide an address!'
-        }])
+        return res.send({
+            error: 'You must enter a location!'
+        })
     } 
-        // res.send([{
-        //     forecast: 'Cloudy',
-        //     location: req.query.address
-        // }])
-        geocode(req.query.address,(error,{latitude,longitude, location} = {}) => {
+        
+    geocode(req.query.address,(error,{latitude,longitude, location} = {}) => {
+        if(error){
+            return res.send({error})
+        }
+        forecast(latitude, longitude,(error, forecastData) => {
             if(error){
                 return res.send({error})
-            }
-            forecast(latitude, longitude,(error, forecastData) => {
-                if(error){
-                    return res.send({error})
-                }    
-                res.send([{
-                         forecast: forecastData,
-                         location,
-                         address: req.query.address
-                     }])
-            })
+            }    
+            res.send({
+                        forecast: forecastData,
+                        location,
+                        address: req.query.address
+                    })
         })
+    })
     // res.render('weather',{
     //     title: 'WEATHER',
     //     author: 'Juhi Lata'
